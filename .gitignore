@@ -2,3 +2,4 @@
 out/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/**
+*.iml
