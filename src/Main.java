@@ -2,13 +2,24 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-        String csvFile = "/Users/Nuth/Documents/Develop/Allianz/jmeter/csv/Type1_ALL.csv";
+//        /Users/Nuth/Documents/Develop/Allianz/jmeter/csv/Type1_ALL.csv
+        Scanner sc = new Scanner(System.in);
+        System.out.print("> Enter input file path : ");
+        String csvFile = sc.nextLine();
         String line;
         String cvsSplitBy = ",";
+        System.out.print("> Enter output file path : ");
+        String outputPath = sc.nextLine();
+        System.out.print("> Enter coverage type(T1/NT1) : ");
+        String coverageType = sc.nextLine();
+        System.out.print("> Enter the number of total record in split file : ");
+        int totalSplitRecords = sc.nextInt();
+
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
             int rowNum = 0;
             List<List<String>> rows = new ArrayList<>();
@@ -22,22 +33,24 @@ public class Main {
                 }
                 rowNum++;
             }
-            splitToMultipleFile(rows);
+            splitToMultipleFile(rows, outputPath, totalSplitRecords, coverageType);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void splitToMultipleFile(List<List<String>> rows) throws IOException {
-        FileWriter csvWriter = new FileWriter("/Users/Nuth/Documents/Develop/Allianz/jmeter/csv/new_1.csv");
+    private static void splitToMultipleFile(List<List<String>> rows, String outputPath, int totalSplitRecords, String coverageType) throws IOException {
+//        /Users/Nuth/Documents/Develop/Allianz/jmeter/csv/
+        System.out.println("Splitting csv file...");
+        FileWriter csvWriter = new FileWriter(outputPath+"/"+coverageType+"_1.csv");
         int countWriter = 0;
         int countRow = 0;
         for (List<String> rowData : rows) {
-            if (countRow%1000 == 0) {
+            if (countRow%totalSplitRecords == 0) {
                 countWriter++;
                 csvWriter.flush();
                 csvWriter.close();
-                csvWriter = new FileWriter("/Users/Nuth/Documents/Develop/Allianz/jmeter/csv/new_"+countWriter+".csv");
+                csvWriter = new FileWriter(outputPath+"/"+coverageType+"_"+countWriter+".csv");
                 List<String> headerRow = Arrays.asList("no", "PolicyStartDate", "PolicyExpiryDate","channel","make","model","usage",
                         "garageType","vehicleIdentificationNumber","registrationNumber","regionType","engineNumber","productPackages_name",
                         "coverType","modelYear","grossTotal","productCode");
@@ -50,5 +63,8 @@ public class Main {
         }
         csvWriter.flush();
         csvWriter.close();
+        System.out.println("==================================");
+        System.out.println("Total split file = "+countWriter);
+        System.out.println("==================================");
     }
 }
